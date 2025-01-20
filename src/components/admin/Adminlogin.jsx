@@ -16,7 +16,7 @@ const LoginPage = () => {
 
     try {
       // Send login credentials to the backend
-      const response = await axios.post('http://localhost:5000/api/auth/login', { username, password });
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/login`, { username, password });
 
       if (response.status === 200) {
         const { token } = response.data;

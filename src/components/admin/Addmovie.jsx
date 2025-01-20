@@ -1,3 +1,5 @@
+
+
 import React, { useEffect, useState } from "react";
 import {
   TextField,
@@ -23,16 +25,17 @@ const AddMoviePage = () => {
     rating: "",
     releaseDate: "",
     duration: "",
+    image: null, // To store the uploaded image
   });
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [open1, setOpen1] = useState(false);
+  const [openAddModal, setOpenAddModal] = useState(false);
+  const [openEditModal, setOpenEditModal] = useState(false);
 
   const fetchMovies = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/movies");
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/movies`);
       setMovies(response.data);
       setLoading(false);
     } catch (err) {
@@ -46,10 +49,16 @@ const AddMoviePage = () => {
   }, []);
 
   const handleChange = (e) => {
-    setMovie({ ...movie, [e.target.name]: e.target.value });
+    const { name, value, type, files } = e.target;
+    if (type === "file") {
+      setMovie({ ...movie, image: files[0] }); // Handle image files
+    } else {
+      setMovie({ ...movie, [name]: value });
+    }
   };
 
-  const handleSubmit = async (e) => {
+  // Add Movie API Call
+  const handleAddMovie = async (e) => {
     e.preventDefault();
     try {
       const token = sessionStorage.getItem("token");
@@ -58,45 +67,71 @@ const AddMoviePage = () => {
         return;
       }
 
-      // If movieId exists, update the movie
-      if (movie.movieId) {
-        await axios.put(
-          `http://localhost:5000/movies/${movie.movieId}`,
-          movie,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        alert("Movie updated successfully!");
-      } else {
-        // Add new movie
-        await axios.post(
-          "http://localhost:5000/movies",
-          movie,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        alert("Movie added successfully!");
+      const formData = new FormData();
+      for (const key in movie) {
+        formData.append(key, movie[key]);
       }
 
-      fetchMovies(); // Refresh movie list after adding or updating
-      setOpen(false); // Close the modal after submission
-      setOpen1(false); // Close the modal after submission
+      await axios.post(`${process.env.REACT_APP_API_URL}/post`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data", // Ensure the server expects form data
+        },
+      });
+
+      alert("Movie added successfully!");
+      fetchMovies(); // Refresh movie list
+      setOpenAddModal(false); // Close the modal
     } catch (error) {
       console.error(error);
       if (error.response) {
-        alert(`Failed to process movie: ${error.response.data.message}`);
+        alert(`Failed to add movie: ${error.response.data.message}`);
       } else {
-        alert("Failed to process movie due to a network or server error.");
+        alert("Failed to add movie due to a network or server error.");
       }
     }
   };
 
+  // Edit Movie API Call
+  const handleEditMovie = async (e) => {
+    e.preventDefault();
+    try {
+      const token = sessionStorage.getItem("token");
+      if (!token) {
+        alert("User not authenticated. Please log in.");
+        return;
+      }
+
+      const formData = new FormData();
+      for (const key in movie) {
+        formData.append(key, movie[key]);
+      }
+
+      await axios.put(
+        `${process.env.REACT_APP_API_URL}/movies/${movie.movieId}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data", // Ensure the server expects form data
+          },
+        }
+      );
+
+      alert("Movie updated successfully!");
+      fetchMovies(); // Refresh movie list
+      setOpenEditModal(false); // Close the modal
+    } catch (error) {
+      console.error(error);
+      if (error.response) {
+        alert(`Failed to update movie: ${error.response.data.message}`);
+      } else {
+        alert("Failed to update movie due to a network or server error.");
+      }
+    }
+  };
+
+  // Delete Movie API Call
   const handleDelete = async (movieId) => {
     try {
       const token = sessionStorage.getItem("token");
@@ -104,7 +139,7 @@ const AddMoviePage = () => {
         alert("User not authenticated. Please log in.");
         return;
       }
-      await axios.delete(`http://localhost:5000/movies/${movieId}`, {
+      await axios.delete(`${process.env.REACT_APP_API_URL}/movies/${movieId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -117,16 +152,16 @@ const AddMoviePage = () => {
     }
   };
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  // Handle modal open/close
+  const handleOpenAddModal = () => setOpenAddModal(true);
+  const handleCloseAddModal = () => setOpenAddModal(false);
 
-  // Edit modal open and close
-  const handleOpen1 = (movieId) => {
+  const handleOpenEditModal = (movieId) => {
     const movieToEdit = movies.find((movie) => movie.movieId === movieId);
     setMovie(movieToEdit);
-    setOpen1(true);
+    setOpenEditModal(true);
   };
-  const handleClose1 = () => setOpen1(false);
+  const handleCloseEditModal = () => setOpenEditModal(false);
 
   const modalStyle = {
     position: "absolute",
@@ -155,7 +190,7 @@ const AddMoviePage = () => {
           marginBottom: "20px",
         }}
       >
-        <Button variant="contained" color="primary" onClick={handleOpen}>
+        <Button variant="contained" color="primary" onClick={handleOpenAddModal}>
           Add Movie
         </Button>
       </div>
@@ -191,7 +226,7 @@ const AddMoviePage = () => {
                   <Button
                     variant="contained"
                     color="secondary"
-                    onClick={() => handleOpen1(movie.movieId)}
+                    onClick={() => handleOpenEditModal(movie.movieId)}
                   >
                     Edit
                   </Button>
@@ -203,16 +238,19 @@ const AddMoviePage = () => {
       </TableContainer>
 
       {/* Add Movie Modal */}
-      <Modal open={open} onClose={handleClose}>
+      <Modal open={openAddModal} onClose={handleCloseAddModal}>
         <Box sx={modalStyle}>
-          <Typography
-            variant="h6"
-            component="h2"
-            style={{ marginBottom: "20px" }}
-          >
+          <Typography variant="h6" component="h2" style={{ marginBottom: "20px" }}>
             Add Movie
           </Typography>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleAddMovie}>
+            <TextField
+              name="movieId"
+              label="Movie Id"
+              fullWidth
+              margin="normal"
+              onChange={handleChange}
+            />
             <TextField
               name="name"
               label="Movie Name"
@@ -245,6 +283,14 @@ const AddMoviePage = () => {
               onChange={handleChange}
               required
             />
+            {/* Image Upload Field */}
+            <input
+              type="file"
+              name="image"
+              onChange={handleChange}
+              accept="image/*"
+              style={{ marginBottom: "16px" }}
+            />
             <div
               style={{
                 display: "flex",
@@ -258,7 +304,7 @@ const AddMoviePage = () => {
               <Button
                 variant="contained"
                 color="secondary"
-                onClick={handleClose}
+                onClick={handleCloseAddModal}
               >
                 Cancel
               </Button>
@@ -268,16 +314,12 @@ const AddMoviePage = () => {
       </Modal>
 
       {/* Edit Movie Modal */}
-      <Modal open={open1} onClose={handleClose1}>
+      <Modal open={openEditModal} onClose={handleCloseEditModal}>
         <Box sx={modalStyle}>
-          <Typography
-            variant="h6"
-            component="h2"
-            style={{ marginBottom: "20px" }}
-          >
+          <Typography variant="h6" component="h2" style={{ marginBottom: "20px" }}>
             Edit Movie Details
           </Typography>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleEditMovie}>
             <TextField
               name="movieId"
               label="Movie Id"
@@ -285,7 +327,7 @@ const AddMoviePage = () => {
               margin="normal"
               value={movie.movieId}
               onChange={handleChange}
-              required
+              disabled
             />
             <TextField
               name="name"
@@ -323,6 +365,14 @@ const AddMoviePage = () => {
               onChange={handleChange}
               required
             />
+            {/* Image Upload Field */}
+            <input
+              type="file"
+              name="image"
+              onChange={handleChange}
+              accept="image/*"
+              style={{ marginBottom: "16px" }}
+            />
             <div
               style={{
                 display: "flex",
@@ -336,7 +386,7 @@ const AddMoviePage = () => {
               <Button
                 variant="contained"
                 color="secondary"
-                onClick={handleClose1}
+                onClick={handleCloseEditModal}
               >
                 Cancel
               </Button>

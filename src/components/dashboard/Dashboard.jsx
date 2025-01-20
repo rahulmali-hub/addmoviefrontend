@@ -21,8 +21,8 @@ import InboxIcon from "@mui/icons-material/MoveToInbox";
 import MailIcon from "@mui/icons-material/Mail";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Button, TableCell, TableRow } from "@mui/material";
-import MovieCreationIcon from '@mui/icons-material/MovieCreation';
-import LocalMoviesIcon from '@mui/icons-material/LocalMovies';
+import MovieCreationIcon from "@mui/icons-material/MovieCreation";
+import LocalMoviesIcon from "@mui/icons-material/LocalMovies";
 const drawerWidth = 240;
 
 const openedMixin = (theme) => ({
@@ -117,7 +117,7 @@ export default function MiniDrawer() {
     const token = sessionStorage.getItem("token");
     if (token) {
       axios
-        .get("http://localhost:5000/api/auth/login", {
+        .get(`${process.env.REACT_APP_API_URL}/api/auth/login`, {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => {
@@ -164,33 +164,48 @@ export default function MiniDrawer() {
             <MenuIcon />
           </IconButton>
           <TableRow
-  style={{
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "0 16px",
-  }}
->
-  <Typography
-    variant="h6"
-    noWrap
-    // component="div"
-   
-  >
-    Admin Movie Dashboard
-  </Typography>
- 
- 
-</TableRow>
-
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "0 16px",
+            }}
+          >
+            <Typography
+              variant="h6"
+              noWrap
+              // component="div"
+            >
+              Admin Movie Dashboard
+              <Button
+                style={{
+                  // height: "40px", // Set a reasonable height for the button
+                  padding: "0 16px", // Add padding to make the text look centered
+                  backgroundColor: "", // Set the button's background color to black
+                  color: "white", // Set the text color to white for contrast
+                  borderRadius: "4px", // Add rounded corners for aesthetics
+                  // Add top margin to space out the button
+                  marginLeft: "700px", // Add left margin to position it
+                  display: "inline-flex", // Ensure the button stays aligned properly
+                  alignItems: "center", // Vertically center the text
+                  justifyContent: "center", // Horizontally center the text
+                  fontSize: "20px", // Set an appropriate font size
+                  textTransform: "none", // Prevent automatic text transformation (e.g., no uppercase)
+                   // Optional: Add subtle shadow for a 3D effect
+                }}
+                variant="contained"
+                onClick={logout}
+              >
+                Logout
+              </Button>
+            </Typography>
+          </TableRow>
         </Toolbar>
-   
-
-    
       </AppBar>
       <Drawer variant="permanent" open={open}>
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
+            <span style={{ marginRight: "50px", Color: "blue" }}>Actions</span>
             {theme.direction === "rtl" ? (
               <ChevronRightIcon />
             ) : (
@@ -200,12 +215,15 @@ export default function MiniDrawer() {
         </DrawerHeader>
         <Divider />
 
-        <List>
+        <List style={{}}>
           {["Movies"].map((text, index) => (
             <ListItem
               key={text}
               disablePadding
-              sx={{ display: "block" }}
+              style={{
+                display: "block",
+                cursor: "pointer",
+              }}
               onClick={() => {
                 navigate("/home/add");
               }}
@@ -240,7 +258,11 @@ export default function MiniDrawer() {
                         },
                   ]}
                 >
-                  {index % 2 === 0 ? <MovieCreationIcon /> : <MovieCreationIcon />}
+                  {index % 2 === 0 ? (
+                    <MovieCreationIcon />
+                  ) : (
+                    <MovieCreationIcon />
+                  )}
                 </ListItemIcon>
                 <ListItemText
                   primary={text}
@@ -259,6 +281,7 @@ export default function MiniDrawer() {
           ))}
         </List>
         <Divider />
+
         <List>
           {["All Movies"].map((text, index) => (
             <ListItem
@@ -317,17 +340,7 @@ export default function MiniDrawer() {
             </ListItem>
           ))}
         </List>
-        <div style={{paddingBottom:'auto'}}>
-  <Button
-    variant="contained"
-    color="black"
-    onClick={logout}
-    style={{height:'10px',width:'10px'}}
-    
-    >
-    Logout
-  </Button>
-  </div>
+
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <DrawerHeader />
