@@ -192,7 +192,7 @@ const MovieList = () => {
                   textAlign: "center",
                 }}
               >
-                {item.image && <img src={`http://localhost:5000/${item.image}`} alt={item.name} style={{ borderRadius: '2rem', height: '5rem', width: '7rem' }} />}
+                {item.image && <img src={`${process.env.REACT_APP_API_URL}/${item.image}`} alt={item.name} style={{ borderRadius: '2rem', height: '5rem', width: '7rem' }} />}
               </Typography>
               <Typography
                 variant="h6"
