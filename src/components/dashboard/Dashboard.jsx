@@ -179,19 +179,17 @@ export default function MiniDrawer() {
               Admin Movie Dashboard
               <Button
                 style={{
-                  // height: "40px", // Set a reasonable height for the button
-                  padding: "0 16px", // Add padding to make the text look centered
-                  backgroundColor: "", // Set the button's background color to black
-                  color: "white", // Set the text color to white for contrast
-                  borderRadius: "4px", // Add rounded corners for aesthetics
-                  // Add top margin to space out the button
-                  marginLeft: "700px", // Add left margin to position it
-                  display: "inline-flex", // Ensure the button stays aligned properly
-                  alignItems: "center", // Vertically center the text
-                  justifyContent: "center", // Horizontally center the text
-                  fontSize: "20px", // Set an appropriate font size
-                  textTransform: "none", // Prevent automatic text transformation (e.g., no uppercase)
-                   // Optional: Add subtle shadow for a 3D effect
+                  
+                  padding: "0 16px", 
+                  backgroundColor: "", 
+                  color: "white",
+                  borderRadius: "4px",
+                  marginLeft: "700px",
+                  display: "inline-flex", 
+                  alignItems: "center", 
+                  justifyContent: "center",
+                  fontSize: "20px", 
+                  textTransform: "none",
                 }}
                 variant="contained"
                 onClick={logout}

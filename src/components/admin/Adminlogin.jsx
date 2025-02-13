@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { Button } from '@mui/material';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -91,6 +92,9 @@ const LoginPage = () => {
           {loading ? 'Logging in...' : 'Login'}
         </button>
       </form>
+      <p>Create your Account
+      <Button onClick={()=>navigate("/register")}>Register</Button>
+      </p>
     </div>
   </div>
   );

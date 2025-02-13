@@ -17,7 +17,7 @@ const MovieList = () => {
   const { auth } = useContext(AuthContext);
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 3;
-  const [sortBy, setSortBy] = useState("");  // State to track sorting criteria
+  const [Auth, setAuth] = useState("");  // State to track sorting criteria
   const [sortOption, setSortOption] = useState("name"); // Default sorting by namesort
 
   useEffect(() => {
@@ -38,6 +38,11 @@ const MovieList = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [search]);
+  /////////////disable login button
+  useEffect(() => {
+    const token = sessionStorage.getItem("token");
+    setAuth({ token }); // Assuming `auth` is managed via state
+  }, []);
 
   const filteredMovies = movies.filter((movie) => {
     const searchLower = search.toLowerCase();
@@ -102,25 +107,26 @@ const MovieList = () => {
               ALL Movies List
             </h1>
           </TableCell>
-          {!auth.token && (
-            <TableCell>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => navigate("/login")}
-                style={{
-                  backgroundColor: "#007bff",
-                  padding: "8px 20px",
-                  color: "white",
-                  fontWeight: "500",
-                  textTransform: "none",
-                  borderRadius: "5px",
-                }}
-              >
-                Login
-              </Button>
-            </TableCell>
-          )}
+          {/* {!auth.token && ( */}
+         <TableCell>
+         <Button
+           variant="contained"
+           color="primary"
+           onClick={() => navigate("/login")}
+           disabled={!!Auth.token} // Disable if token exists
+           style={{
+             backgroundColor: Auth.token ? "#ccc" : "#007bff", // Grey background when disabled
+             padding: "8px 20px",
+             color: Auth.token ? "black" : "white",
+             fontWeight: "500",
+             textTransform: "none",
+             borderRadius: "5px",
+           }}
+         >
+           {Auth.token ? "Logged In" : "Login"}
+         </Button>
+       </TableCell>
+          {/* )} */}
         </TableRow>
       </div>
 
@@ -180,7 +186,7 @@ const MovieList = () => {
             style={{ backgroundColor: "#fff" }}
           >
             <CardContent>
-              <Typography
+              {/* <Typography
                 variant="h6"
                 component="div"
                 gutterBottom
@@ -190,10 +196,10 @@ const MovieList = () => {
                   color: "navy",
                   marginBottom: "10px",
                   textAlign: "center",
-                }}
-              >
-                {item.image && <img src={`${process.env.REACT_APP_API_URL}/${item.image}`} alt={item.name} style={{ borderRadius: '2rem', height: '5rem', width: '7rem' }} />}
-              </Typography>
+                }} */}
+              {/* > */}
+                {/* {item.image && <img src={`${process.env.REACT_APP_API_URL}/${item.image}`} alt={item.name} style={{ borderRadius: '2rem', height: '5rem', width: '7rem' }} />} */}
+              {/* </Typography> */}
               <Typography
                 variant="h6"
                 component="div"
